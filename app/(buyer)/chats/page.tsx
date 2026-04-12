@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { Suspense, useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Send, ArrowLeft, MoreVertical } from 'lucide-react'
@@ -53,7 +53,7 @@ function formatRelative(iso: string | null) {
 
 // ─── Component ───────────────────────────────────────────────
 
-export default function BuyerChatsPage() {
+function BuyerChatsPage() {
   const supabase = createClient()
   const searchParams = useSearchParams()
   const convParam = searchParams.get('conv')
@@ -446,5 +446,13 @@ export default function BuyerChatsPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function ChatsPage() {
+  return (
+    <Suspense>
+      <BuyerChatsPage />
+    </Suspense>
   )
 }

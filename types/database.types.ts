@@ -303,6 +303,22 @@ export interface Database {
           seller_unread?: number
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'conversations_buyer_id_fkey'
+            columns: ['buyer_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'conversations_store_id_fkey'
+            columns: ['store_id']
+            isOneToOne: false
+            referencedRelation: 'stores'
+            referencedColumns: ['id']
+          }
+        ]
       }
       messages: {
         Row: {
@@ -325,6 +341,15 @@ export interface Database {
           sender_id?: string
           content?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'messages_conversation_id_fkey'
+            columns: ['conversation_id']
+            isOneToOne: false
+            referencedRelation: 'conversations'
+            referencedColumns: ['id']
+          }
+        ]
       }
     }
     Views: Record<string, never>
