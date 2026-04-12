@@ -94,10 +94,14 @@ function BuyerChatsPage() {
         .order('last_message_at', { ascending: false })
 
       if (!error && data) {
-        setConversations(data as ConversationWithStore[])
+        // Filter out conversations with failed store joins
+        const validConversations = (data as unknown as ConversationWithStore[]).filter(
+          (conv) => conv.store && typeof conv.store === "object" && "id" in conv.store
+        )
+        setConversations(validConversations)
         // Auto-select: prefer URL param, then first conversation
-        if (data.length > 0 && !selectedId) {
-          setSelectedId(convParam ?? data[0].id)
+        if (validConversations.length > 0 && !selectedId) {
+          setSelectedId(convParam ?? validConversations[0].id)
         }
       }
       setLoadingConvs(false)
