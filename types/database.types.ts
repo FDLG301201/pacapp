@@ -1,6 +1,6 @@
-// Hand-written types for Phase 1.
-// Regenerate with the Supabase CLI once connected:
-//   pnpm supabase gen types typescript --project-id <project-id> > types/database.types.ts
+// Hand-written types — Phase 1 + Phase 5 (Chat).
+// Regenerate with the Supabase CLI after running migrations:
+//   pnpm dlx supabase gen types typescript --project-id <project-id> > types/database.types.ts
 
 export type UserRole = 'buyer' | 'seller' | 'admin'
 export type SubscriptionPlan = 'free' | 'basic' | 'pro'
@@ -116,6 +116,65 @@ export interface Database {
           subscription_ends_at?: string | null
           is_verified?: boolean
           updated_at?: string
+        }
+      }
+      conversations: {
+        Row: {
+          id: string
+          buyer_id: string
+          store_id: string
+          product_id: string | null
+          last_message: string | null
+          last_message_at: string | null
+          buyer_unread: number
+          seller_unread: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          buyer_id: string
+          store_id: string
+          product_id?: string | null
+          last_message?: string | null
+          last_message_at?: string | null
+          buyer_unread?: number
+          seller_unread?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          buyer_id?: string
+          store_id?: string
+          product_id?: string | null
+          last_message?: string | null
+          last_message_at?: string | null
+          buyer_unread?: number
+          seller_unread?: number
+          updated_at?: string
+        }
+      }
+      messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          sender_id?: string
+          content?: string
         }
       }
     }
