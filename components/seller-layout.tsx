@@ -1,20 +1,23 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, Store, MessageCircle, CreditCard, BarChart3, Menu, Bell } from 'lucide-react'
+import { LayoutDashboard, Package, Store, MessageCircle, CreditCard, BarChart3, Menu, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Logo } from './logo'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 const navItems = [
-  { href: '/seller/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/seller/productos', label: 'Productos', icon: Package },
-  { href: '/seller/tienda', label: 'Mi Tienda', icon: Store },
-  { href: '/seller/chats', label: 'Chats', icon: MessageCircle, badge: 2 },
-  { href: '/seller/suscripcion', label: 'Suscripción', icon: CreditCard },
-  { href: '/seller/estadisticas', label: 'Estadísticas', icon: BarChart3 },
+  { href: '/seller/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
+  { href: '/seller/productos',   label: 'Productos',    icon: Package },
+  { href: '/seller/tienda',      label: 'Mi Tienda',    icon: Store },
+  { href: '/seller/chats',       label: 'Chats',        icon: MessageCircle },
+  { href: '/seller/suscripcion', label: 'Suscripción',  icon: CreditCard },
+  { href: '/seller/estadisticas',label: 'Estadísticas', icon: BarChart3 },
 ]
 
 interface SellerLayoutProps {
@@ -22,24 +25,29 @@ interface SellerLayoutProps {
   storeName?: string
 }
 
-export function SellerLayout({ children, storeName = 'Pacas La Bendición' }: SellerLayoutProps) {
+export function SellerLayout({ children, storeName = '' }: SellerLayoutProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    toast.success('Sesión cerrada')
+    router.push('/')
+  }
 
   const NavContent = () => (
     <nav className="space-y-1">
       {navItems.map((item) => {
-        const isActive = pathname === item.href
+        const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
         return (
           <Link key={item.href} href={item.href}>
             <Button
               variant={isActive ? 'secondary' : 'ghost'}
-              className={`w-full justify-start gap-3 ${isActive ? 'bg-primary/10 text-primary' : ''}`}
+              className={`w-full justify-start gap-3 ${isActive ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary' : ''}`}
             >
               <item.icon className="h-5 w-5" />
               {item.label}
-              {item.badge && (
-                <Badge className="ml-auto">{item.badge}</Badge>
-              )}
             </Button>
           </Link>
         )
@@ -55,16 +63,28 @@ export function SellerLayout({ children, storeName = 'Pacas La Bendición' }: Se
           <Logo />
         </div>
         <div className="flex-1 p-4">
-          <p className="text-xs text-muted-foreground mb-2">TIENDA</p>
-          <p className="font-medium mb-4 truncate">{storeName}</p>
+          {storeName && (
+            <>
+              <p className="text-xs text-muted-foreground mb-1">TIENDA</p>
+              <p className="font-medium mb-4 truncate">{storeName}</p>
+            </>
+          )}
           <NavContent />
         </div>
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
           <Link href="/">
             <Button variant="outline" className="w-full">
               Ver catálogo público
             </Button>
           </Link>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-5 w-5" />
+            Cerrar sesión
+          </Button>
         </div>
       </aside>
 
@@ -78,47 +98,48 @@ export function SellerLayout({ children, storeName = 'Pacas La Bendición' }: Se
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0">
+            <SheetContent side="left" className="w-64 p-0 flex flex-col">
               <div className="p-4 border-b">
                 <Logo />
               </div>
-              <div className="p-4">
-                <p className="text-xs text-muted-foreground mb-2">TIENDA</p>
-                <p className="font-medium mb-4 truncate">{storeName}</p>
+              <div className="flex-1 p-4">
+                {storeName && (
+                  <>
+                    <p className="text-xs text-muted-foreground mb-1">TIENDA</p>
+                    <p className="font-medium mb-4 truncate">{storeName}</p>
+                  </>
+                )}
                 <NavContent />
               </div>
-              <div className="p-4 border-t mt-auto">
+              <div className="p-4 border-t space-y-2">
                 <Link href="/">
                   <Button variant="outline" className="w-full">
                     Ver catálogo público
                   </Button>
                 </Link>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-5 w-5" />
+                  Cerrar sesión
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
           <Logo />
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-              3
-            </Badge>
-          </Button>
+          {/* Spacer to keep logo centered */}
+          <div className="w-10" />
         </header>
 
         {/* Mobile Bottom Nav */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex items-center justify-around py-2 z-50">
           {navItems.slice(0, 5).map((item) => {
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 p-2">
-                <div className="relative">
-                  <item.icon className={`h-5 w-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
-                  {item.badge && (
-                    <Badge className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center p-0 text-[10px]">
-                      {item.badge}
-                    </Badge>
-                  )}
-                </div>
+                <item.icon className={`h-5 w-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                 <span className={`text-xs ${isActive ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
                   {item.label}
                 </span>

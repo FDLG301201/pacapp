@@ -3,8 +3,6 @@
 "use client"
 
 import { useState } from "react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -156,11 +154,8 @@ export default function ExplorePage() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Header />
-      
-      <main className="flex-1">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="bg-background">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground">Explorar Productos</h1>
             <p className="mt-2 text-muted-foreground">
@@ -272,10 +267,7 @@ export default function ExplorePage() {
               )}
             </div>
           </div>
-        </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   )
 }

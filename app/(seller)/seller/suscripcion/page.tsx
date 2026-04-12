@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { SellerLayout } from '@/components/seller-layout'
 import { plans, formatPrice } from '@/lib/mock-data'
 
 const paymentHistory = [
@@ -17,8 +16,7 @@ export default function SuscripcionPage() {
   const currentPlan = 'basic'
 
   return (
-    <SellerLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div>
           <h1 className="font-serif text-2xl md:text-3xl font-bold">
@@ -177,6 +175,5 @@ export default function SuscripcionPage() {
           </CardContent>
         </Card>
       </div>
-    </SellerLayout>
   )
 }

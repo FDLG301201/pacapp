@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { SellerLayout } from "@/components/seller-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -91,8 +90,7 @@ export default function SellerChatsPage() {
   )
 
   return (
-    <SellerLayout>
-      <div className="flex h-[calc(100vh-180px)] overflow-hidden rounded-lg border bg-card">
+    <div className="flex h-[calc(100vh-180px)] overflow-hidden rounded-lg border bg-card">
         {/* Chat List */}
         <div className="w-full border-r md:w-80 lg:w-96">
           <div className="border-b p-4">
@@ -254,6 +252,5 @@ export default function SellerChatsPage() {
           )}
         </div>
       </div>
-    </SellerLayout>
   )
 }

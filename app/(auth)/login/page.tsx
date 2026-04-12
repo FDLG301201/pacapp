@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,8 +14,9 @@ import { Logo } from '@/components/logo'
 import { createClient } from '@/lib/supabase/client'
 import { loginSchema, type LoginInput } from '@/lib/validations/auth'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [serverError, setServerError] = useState<string | null>(null)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
@@ -42,9 +43,34 @@ export default function LoginPage() {
       return
     }
 
-    // Middleware will redirect based on role after session is refreshed
     router.refresh()
-    router.push('/')
+
+    // Honor redirectTo param (e.g. user was sent to login from a protected route)
+    const redirectTo = searchParams.get('redirectTo')
+    if (redirectTo && redirectTo.startsWith('/')) {
+      router.push(redirectTo)
+      return
+    }
+
+    // Redirect based on role
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.role === 'seller') {
+        router.push('/seller/dashboard')
+      } else if (profile?.role === 'admin') {
+        router.push('/admin/dashboard')
+      } else {
+        router.push('/')
+      }
+    } else {
+      router.push('/')
+    }
   }
 
   async function handleGoogleLogin() {
@@ -181,5 +207,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

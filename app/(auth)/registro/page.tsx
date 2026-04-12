@@ -60,7 +60,13 @@ export default function RegistroPage() {
     }
 
     router.refresh()
-    router.push('/')
+
+    // Sellers go straight to onboarding to create their store
+    if (data.role === 'seller') {
+      router.push('/seller/onboarding')
+    } else {
+      router.push('/')
+    }
   }
 
   async function handleGoogleSignup() {

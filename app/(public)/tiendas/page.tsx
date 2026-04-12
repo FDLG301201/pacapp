@@ -3,8 +3,6 @@
 "use client"
 
 import { useState } from "react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
 import { StoreCard } from "@/components/store-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Search, MapPin, Star, Store } from "lucide-react"
-import { stores, provinces } from "@/lib/mock-data"
+import { stores } from "@/lib/mock-data"
+// TODO (phase 3): replace with real province list from lib/validations/store.ts
+const provinces: string[] = []
 
 export default function TiendasPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -49,11 +49,8 @@ export default function TiendasPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Header />
-      
-      <main className="flex-1">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="bg-background">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground">Tiendas de Pacas</h1>
             <p className="mt-2 text-muted-foreground">
@@ -155,10 +152,7 @@ export default function TiendasPage() {
               ))}
             </div>
           )}
-        </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   )
 }

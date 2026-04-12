@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Header } from '@/components/header'
 import { stores } from '@/lib/mock-data'
 
 const distances = ['0.5 km', '1.2 km', '2.3 km', '3.1 km', '4.5 km', '5.8 km']
@@ -26,10 +25,7 @@ export default function MapPage() {
   })
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <main className="flex-1 flex flex-col lg:flex-row">
+    <div className="flex flex-1 flex-col lg:flex-row">
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex flex-col w-[400px] border-r bg-card">
           {/* Filters */}
@@ -288,7 +284,6 @@ export default function MapPage() {
             </Sheet>
           </div>
         </div>
-      </main>
     </div>
   )
 }
