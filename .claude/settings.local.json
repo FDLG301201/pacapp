@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add:*)",
+      "Bash(supabase init:*)",
+      "Bash(mkdir -p 'c:/Users/Helen/Desktop/UNAPEC/CUATRIMESTRES/C9/Actitud Emprendedora/PACAPP/app/\\(public\\)/productos/[id]')",
+      "Bash(mkdir -p 'c:/Users/Helen/Desktop/UNAPEC/CUATRIMESTRES/C9/Actitud Emprendedora/PACAPP/app/\\(public\\)/tiendas/[id]')"
+    ]
+  }
+}
