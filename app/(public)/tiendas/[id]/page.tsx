@@ -9,6 +9,7 @@ import { ProductGrid } from "@/components/catalog/ProductGrid"
 import { ContactModalButton } from "@/components/catalog/ContactModalButton"
 import { FavoriteButton } from "@/components/catalog/FavoriteButton"
 import { EmptyState } from "@/components/shared/EmptyState"
+import { StoreMiniMapWrapper } from "./StoreMiniMapWrapper"
 import { createClient } from "@/lib/supabase/server"
 import { CheckCircle, MapPin, Phone, MessageSquare, Share2, Star, MessageCircle } from "lucide-react"
 
@@ -194,7 +195,19 @@ export default async function StoreProfilePage({ params }: StorePageProps) {
 
             {/* Información Tab */}
             <TabsContent value="info" className="mt-8">
-              <div className="grid md:grid-cols-2 gap-8 max-w-2xl">
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Map */}
+                {store.latitude && store.longitude && (
+                  <div className="md:order-first">
+                    <StoreMiniMapWrapper
+                      lat={Number(store.latitude)}
+                      lng={Number(store.longitude)}
+                      storeName={store.name}
+                      isVerified={store.is_verified}
+                    />
+                  </div>
+                )}
+
                 {/* Contact Info */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Contacto</h3>
@@ -205,6 +218,11 @@ export default async function StoreProfilePage({ params }: StorePageProps) {
                         <div>
                           <p className="text-sm text-gray-600">Dirección</p>
                           <p className="font-medium">{store.address}</p>
+                          {!store.latitude || !store.longitude && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Esta tienda aún no está ubicada en el mapa
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}

@@ -3,22 +3,32 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Copy, Check, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Copy, Check, ExternalLink, MapPin } from 'lucide-react'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { StoreFormFields } from '@/components/seller/StoreFormFields'
+import { MapProvider } from '@/components/map/MapProvider'
 import { storeSchema, type StoreInput } from '@/lib/validations/store'
 import { uploadImage, deleteStorageFile } from '@/lib/utils/image'
 import { createClient } from '@/lib/supabase/client'
+
+// Lazy load map component
+const LocationPicker = dynamic(() =>
+  import('@/components/map/LocationPicker').then(mod => ({ default: mod.LocationPicker })),
+  { ssr: false, loading: () => <div className="h-96 bg-muted rounded-lg animate-pulse" /> }
+)
 
 interface EditStoreFormProps {
   storeId: string
   sellerId: string
   initialValues: StoreInput
   existingBannerUrl: string | null
+  initialLatitude?: number
+  initialLongitude?: number
 }
 
 export function EditStoreForm({
@@ -26,6 +36,8 @@ export function EditStoreForm({
   sellerId,
   initialValues,
   existingBannerUrl,
+  initialLatitude,
+  initialLongitude,
 }: EditStoreFormProps) {
   const router = useRouter()
   const [newCoverFile, setNewCoverFile] = useState<File | null>(null)
@@ -33,6 +45,15 @@ export function EditStoreForm({
   const [coverError, setCoverError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [location, setLocation] = useState<{
+    lat: number
+    lng: number
+    formattedAddress: string
+  } | null>(
+    initialLatitude && initialLongitude
+      ? { lat: initialLatitude, lng: initialLongitude, formattedAddress: '' }
+      : null
+  )
 
   const form = useForm<StoreInput>({
     resolver: zodResolver(storeSchema),
@@ -92,6 +113,8 @@ export function EditStoreForm({
           facebook:    values.facebook || null,
           categories:  values.categories,
           banner_url:  bannerUrl,
+          latitude:    location?.lat || null,
+          longitude:   location?.lng || null,
         })
         .eq('id', storeId)
 
@@ -179,6 +202,32 @@ export function EditStoreForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <StoreFormFields form={form} coverImageSlot={coverImageSlot} />
+
+            {/* Location section */}
+            <div className="space-y-3 pt-4 border-t">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-foreground">Ubicación</h3>
+              </div>
+
+              {/* Map provider wrapper */}
+              <MapProvider>
+                <LocationPicker
+                  initialLat={initialLatitude}
+                  initialLng={initialLongitude}
+                  onChange={(data) => {
+                    setLocation(data)
+                  }}
+                />
+              </MapProvider>
+
+              {location && (
+                <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-800">
+                  ✓ Ubicación actualizada: {location.formattedAddress}
+                </div>
+              )}
+            </div>
+
             <Button
               type="submit"
               size="lg"

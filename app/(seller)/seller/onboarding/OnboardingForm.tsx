@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -9,9 +10,16 @@ import { MapPin } from 'lucide-react'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { StoreFormFields } from '@/components/seller/StoreFormFields'
+import { MapProvider } from '@/components/map/MapProvider'
 import { storeSchema, type StoreInput } from '@/lib/validations/store'
 import { uploadImage } from '@/lib/utils/image'
 import { createClient } from '@/lib/supabase/client'
+
+// Lazy load map components (reduce bundle size)
+const LocationPicker = dynamic(() =>
+  import('@/components/map/LocationPicker').then(mod => ({ default: mod.LocationPicker })),
+  { ssr: false, loading: () => <div className="h-96 bg-muted rounded-lg animate-pulse" /> }
+)
 
 function generateSlug(name: string): string {
   const base = name
@@ -32,6 +40,11 @@ export function OnboardingForm() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const [coverError, setCoverError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [location, setLocation] = useState<{
+    lat: number
+    lng: number
+    formattedAddress: string
+  } | null>(null)
 
   const form = useForm<StoreInput>({
     resolver: zodResolver(storeSchema),
@@ -92,6 +105,8 @@ export function OnboardingForm() {
         address: values.address,
         province: values.province,
         categories: values.categories,
+        latitude: location?.lat || null,
+        longitude: location?.lng || null,
         status: 'active',
         subscription_plan: 'free',
         subscription_status: 'active',
@@ -161,17 +176,39 @@ export function OnboardingForm() {
           </p>
         </div>
 
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-          <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            Podrás ubicar tu tienda en el mapa más adelante. Por ahora solo
-            necesitamos tu dirección escrita.
-          </p>
-        </div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <StoreFormFields form={form} coverImageSlot={coverImageSlot} />
+
+            {/* Location section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-foreground">
+                  Ubicación en el mapa (opcional pero recomendado)
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Al ubicar tu tienda en el mapa, los compradores pueden encontrarte más fácil y ordenar
+                resultados por cercanía. Puedes agregarlo ahora o más tarde desde tu dashboard.
+              </p>
+
+              {/* Map provider wrapper */}
+              <MapProvider>
+                <LocationPicker
+                  onChange={(data) => {
+                    setLocation(data)
+                  }}
+                />
+              </MapProvider>
+
+              {location && (
+                <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-800">
+                  ✓ Ubicación guardada: {location.formattedAddress}
+                </div>
+              )}
+            </div>
+
             <Button
               type="submit"
               disabled={submitting}

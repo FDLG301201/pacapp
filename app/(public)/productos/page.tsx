@@ -31,12 +31,30 @@ async function getCatalogData(searchParams: Record<string, string | string[] | u
   const maxPrice = typeof searchParams.max_price === "string" ? parseInt(searchParams.max_price) : 100000
   const verified = searchParams.verified === "true"
   const sort = typeof searchParams.sort === "string" ? searchParams.sort : "recent"
+  const userLat = typeof searchParams.user_lat === "string" ? parseFloat(searchParams.user_lat) : null
+  const userLng = typeof searchParams.user_lng === "string" ? parseFloat(searchParams.user_lng) : null
   const page = typeof searchParams.page === "string" ? parseInt(searchParams.page) || 1 : 1
+
+  // Handle distance-based sorting
+  let nearbyStoreIds: string[] | null = null
+  if (sort === "nearest" && userLat && userLng) {
+    // Call stores_near RPC to get nearby stores within 50km
+    const { data: nearbyStores } = await supabase.rpc("stores_near", {
+      user_lat: userLat,
+      user_lng: userLng,
+      max_km: 50,
+    })
+
+    if (nearbyStores && Array.isArray(nearbyStores)) {
+      // Extract store IDs in distance order
+      nearbyStoreIds = nearbyStores.map((store: any) => store.id)
+    }
+  }
 
   // Build query
   let query = supabase
     .from("products")
-    .select("*,product_images(url,position),stores(name,slug,is_verified,province,status)", { count: "exact" })
+    .select("*,product_images(url,position),stores(name,slug,is_verified,province,status,latitude,longitude)", { count: "exact" })
     .eq("status", "active")
     .eq("stores.status", "active")
     .gte("price", minPrice)
@@ -55,6 +73,11 @@ async function getCatalogData(searchParams: Record<string, string | string[] | u
   if (province) query = query.eq("stores.province", province)
   if (verified) query = query.eq("stores.is_verified", true)
 
+  // Apply store filter for distance-based sorting
+  if (nearbyStoreIds && nearbyStoreIds.length > 0) {
+    query = query.in("store_id", nearbyStoreIds)
+  }
+
   // Apply sorting
   let orderColumn = "created_at"
   let orderAscending = false
@@ -68,6 +91,11 @@ async function getCatalogData(searchParams: Record<string, string | string[] | u
   } else if (sort === "popular") {
     orderColumn = "views_count"
     orderAscending = false
+  } else if (sort === "nearest" && nearbyStoreIds) {
+    // For nearest, don't apply a column sort; we'll preserve the order from stores_near
+    // Client-side ordering based on nearbyStoreIds order will happen after fetch
+    orderColumn = "created_at"
+    orderAscending = false
   } else {
     // recent (default)
     orderColumn = "created_at"
@@ -79,6 +107,16 @@ async function getCatalogData(searchParams: Record<string, string | string[] | u
   // Pagination
   const offset = (page - 1) * ITEMS_PER_PAGE
   const { data: products, count } = await query.range(offset, offset + ITEMS_PER_PAGE - 1)
+
+  // If sorting by distance, reorder products based on nearby store order
+  let orderedProducts = products
+  if (sort === "nearest" && nearbyStoreIds && products) {
+    orderedProducts = [...products].sort((a, b) => {
+      const aStoreIndex = nearbyStoreIds.indexOf(a.store_id)
+      const bStoreIndex = nearbyStoreIds.indexOf(b.store_id)
+      return aStoreIndex - bStoreIndex
+    })
+  }
 
   // Get user favorites
   let userFavorites: string[] = []
@@ -95,12 +133,14 @@ async function getCatalogData(searchParams: Record<string, string | string[] | u
   const totalPages = Math.ceil((count || 0) / ITEMS_PER_PAGE)
 
   return {
-    products: products || [],
+    products: orderedProducts || [],
     count: count || 0,
     totalPages,
     page,
     user,
     userFavorites,
+    userLat,
+    userLng,
     filters: {
       q,
       category,
@@ -121,7 +161,7 @@ interface CatalogPageProps {
 }
 
 export default async function CatalogPage({ searchParams }: CatalogPageProps) {
-  const { products, count, totalPages, page, user, userFavorites, filters } = await getCatalogData(searchParams)
+  const { products, count, totalPages, page, user, userFavorites, userLat, userLng, filters } = await getCatalogData(searchParams)
 
   const categoryLabel = filters.category ? PRODUCT_CATEGORY_LABELS[filters.category as any] : null
 
@@ -176,7 +216,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                   <SearchInput />
                   <div className="flex gap-2 w-full sm:w-auto">
-                    <SortDropdown currentSort={filters.sort} />
+                    <SortDropdown currentSort={filters.sort} userLat={userLat ?? undefined} userLng={userLng ?? undefined} />
                     <FiltersSheet />
                   </div>
                 </div>

@@ -4,6 +4,7 @@ import { Package, PackageCheck, Eye, PackageOpen, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { MetricCard } from '@/components/metric-card'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { LocationBanner } from '@/components/seller/LocationBanner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DashboardProductActions } from './DashboardProductActions'
@@ -24,7 +25,7 @@ export default async function SellerDashboardPage() {
   // Fetch store
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name, subscription_plan')
+    .select('id, name, subscription_plan, latitude, longitude')
     .eq('owner_id', user.id)
     .maybeSingle()
 
@@ -60,9 +61,14 @@ export default async function SellerDashboardPage() {
     product_images: { url: string }[]
   }>
 
+  const hasLocation = store.latitude !== null && store.longitude !== null
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl px-4 py-8">
+        {/* Location banner */}
+        <LocationBanner hasLocation={hasLocation} />
+
         {/* Header */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>

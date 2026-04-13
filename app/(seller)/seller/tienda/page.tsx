@@ -11,7 +11,7 @@ export default async function EditStorePage() {
 
   const { data: store, error } = await supabase
     .from('stores')
-    .select('id, name, description, address, province, phone, whatsapp, instagram, facebook, categories, banner_url')
+    .select('id, name, description, address, province, phone, whatsapp, instagram, facebook, categories, banner_url, latitude, longitude')
     .eq('owner_id', user.id)
     .maybeSingle()
 
@@ -35,6 +35,8 @@ export default async function EditStorePage() {
       sellerId={user.id}
       initialValues={initialValues}
       existingBannerUrl={store.banner_url ?? null}
+      initialLatitude={store.latitude ?? undefined}
+      initialLongitude={store.longitude ?? undefined}
     />
   )
 }
