@@ -318,6 +318,8 @@ export type Database = {
           phone: string | null
           province: string | null
           slug: string
+          rating_avg: number
+          review_count: number
           status: Database["public"]["Enums"]["store_status"]
           subscription_ends_at: string | null
           subscription_plan: Database["public"]["Enums"]["subscription_plan"]
@@ -342,6 +344,8 @@ export type Database = {
           owner_id: string
           phone?: string | null
           province?: string | null
+          rating_avg?: number
+          review_count?: number
           slug: string
           status?: Database["public"]["Enums"]["store_status"]
           subscription_ends_at?: string | null
@@ -367,6 +371,8 @@ export type Database = {
           owner_id?: string
           phone?: string | null
           province?: string | null
+          rating_avg?: number
+          review_count?: number
           slug?: string
           status?: Database["public"]["Enums"]["store_status"]
           subscription_ends_at?: string | null
@@ -379,6 +385,113 @@ export type Database = {
           {
             foreignKeyName: "stores_owner_id_fkey"
             columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          id: string
+          store_id: string
+          buyer_id: string
+          conversation_id: string | null
+          rating: number
+          comment: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          store_id: string
+          buyer_id: string
+          conversation_id?: string | null
+          rating: number
+          comment?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          store_id?: string
+          buyer_id?: string
+          conversation_id?: string | null
+          rating?: number
+          comment?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_requests: {
+        Row: {
+          id: string
+          store_id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          proof_url: string
+          status: "pending" | "approved" | "rejected"
+          notes: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          store_id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          proof_url: string
+          status?: string
+          notes?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          store_id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          proof_url?: string
+          status?: string
+          notes?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_requests_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
