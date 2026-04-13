@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ShoppingBag, Store, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -60,6 +61,9 @@ export default function RegistroPage() {
     }
 
     router.refresh()
+
+    // Show toast to confirm email
+    toast.info('Revisa tu correo para confirmar tu cuenta. Debes confirmar tu correo antes de iniciar sesión.')
 
     // Sellers go straight to onboarding to create their store
     if (data.role === 'seller') {
@@ -196,6 +200,20 @@ export default function RegistroPage() {
                 />
                 {errors.password && (
                   <p className="text-sm text-destructive">{errors.password.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Repite tu contraseña"
+                  autoComplete="new-password"
+                  {...register('confirmPassword')}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
                 )}
               </div>
 

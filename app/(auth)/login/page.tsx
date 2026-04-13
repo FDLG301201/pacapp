@@ -39,7 +39,11 @@ function LoginForm() {
 
     if (error) {
       console.error('Login error:', error.message)
-      setServerError('Correo o contraseña incorrectos. Intenta de nuevo.')
+      if (error.message.includes('Email not confirmed')) {
+        setServerError('Debes confirmar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.')
+      } else {
+        setServerError('Correo o contraseña incorrectos. Intenta de nuevo.')
+      }
       return
     }
 
